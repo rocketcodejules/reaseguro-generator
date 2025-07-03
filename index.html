@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html style="font-family: 'Arial', sans-serif;">
+<head>
+    <title>Generador de Agentes de Reaseguro</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --danger: #e74c3c;
+        }
+
+        body {
+            margin: 0;
+            background: #f8f9fa;
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .node-palette {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .node {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 10px 0;
+            cursor: grab;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .node::before {
+            content: "🔵";
+            font-size: 1.2em;
+        }
+
+        .canvas {
+            background: white;
+            min-height: 600px;
+            border-radius: 8px;
+            position: relative;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .workflow-node {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 6px;
+            min-width: 180px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .workflow-node.error {
+            border-color: var(--danger);
+        }
+
+        .node-connector {
+            height: 2px;
+            background: #95a5a6;
+            position: absolute;
+            transform-origin: left center;
+        }
+
+        .bottom-bar {
+            display: flex;
+            gap: 15px;
+            padding: 20px;
+            background: #f1f1f1;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-create {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-test {
+            background: var(--danger);
+            color: white;
+        }
+
+        .error-box {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--danger);
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Generador de Agentes de Reaseguro</h1>
+        <div>
+            <button class="btn">Editor</button>
+            <button class="btn">Ejecuciones</button>
+            <button class="btn">Compartir</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="node-palette">
+            <h3>Nodos Disponibles</h3>
+            <div class="node" draggable="true" data-type="gmail-read">Gmail: Leer etiquetas</div>
+            <div class="node" draggable="true" data-type="loop">Bucle de elementos</div>
+            <div class="node" draggable="true" data-type="classify">Clasificar email</div>
+            <div class="node" draggable="true" data-type="slack">Slack: Éxito</div>
+        </div>
+
+        <div class="canvas" id="canvas">
+            <div class="workflow-node" style="top: 50px; left: 100px;">
+                <h4>🔵 When clicking Test workflow</h4>
+            </div>
+            <div class="workflow-node error" style="top: 150px; left: 100px;">
+                <h4>🔴 Webhook (Desactivado)</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="error-box">
+        Problema en el nodo 'Add assigned label name and id to email'. Nodo referenciado no ejecutado [línea: 8]
+    </div>
+
+    <div class="bottom-bar">
+        <button class="btn btn-test">Probar workflow</button>
+        <button class="btn">🗑️</button>
+    </div>
+
+    <script>
+        document.querySelectorAll('.node').forEach(node => {
+            node.addEventListener('dragstart', e => {
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    type: node.dataset.type,
+                    text: node.textContent
+                }));
+            });
+        });
+
+        const canvas = document.getElementById('canvas');
+        
+        canvas.addEventListener('dragover', e => {
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('drop', e => {
+            e.preventDefault();
+            const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+            
+            const newNode = document.createElement('div');
+            newNode.className = 'workflow-node';
+            newNode.style.left = (e.offsetX - 90) + 'px';
+            newNode.style.top = (e.offsetY - 25) + 'px';
+            newNode.innerHTML = `<h4>🔵 ${data.text}</h4>`;
+            newNode.addEventListener('click', showConfig);
+            
+            canvas.appendChild(newNode);
+        });
+
+        function showConfig(e) {
+            alert(`Configuración del nodo:\n\n${e.target.textContent}\n\nCódigo generado: ...`);
+        }
+
+        document.querySelector('.btn-create').addEventListener('click', () => {
+            window.location.href = '/formulario-creacion';
+        });
+    </script>
+</body>
+</html>
